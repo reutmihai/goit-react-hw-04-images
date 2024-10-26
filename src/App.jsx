@@ -1,34 +1,39 @@
 import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from '/vite.svg'
+import { Searchbar } from './components/Searchbar/Searchbar';
+import { getImages } from "../src/services/imageService";
 import './App.css'
 
 function App() {
-  const [count, setCount] = useState(0)
+  const [images, setImages] = useState([]);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState('');
+  const [page, setPage] = useState(1);
+
+   const handleSearchSubmit = async (searchQuery) => {
+     try {
+       setIsLoading(true);
+       const images = await getImages(searchQuery);
+       if (images.length === 0) {
+        setImages([]);
+        setError('N-a fost gasit niciun rezultat.');
+         return;
+       }
+       setImages(images);
+     } catch (error) {
+      setImages([]);
+      setError('A aparut o eroare la cautare.');
+     } finally {
+       setIsLoading(false);
+     }
+   };
+
+
 
   return (
-    <>
-      <div>
-        <a href="https://vitejs.dev" target="_blank">
-          <img src={viteLogo} className="logo" alt="Vite logo" />
-        </a>
-        <a href="https://react.dev" target="_blank">
-          <img src={reactLogo} className="logo react" alt="React logo" />
-        </a>
-      </div>
-      <h1>Vite + React</h1>
-      <div className="card">
-        <button onClick={() => setCount((count) => count + 1)}>
-          count is {count}
-        </button>
-        <p>
-          Edit <code>src/App.jsx</code> and save to test HMR
-        </p>
-      </div>
-      <p className="read-the-docs">
-        Click on the Vite and React logos to learn more
-      </p>
-    </>
+    <div>
+      <Searchbar onFormSubmit={handleSearchSubmit}/>
+    </div>
   )
 }
 
